@@ -16,6 +16,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/simulation/__tests__/velocity.test.mts", "src/simulation/physics/velocity/velocity.test.mts", "src/simulation/physics/velocity/velocity.test.js"],
+  "exclude": ["node_modules"],
 }
