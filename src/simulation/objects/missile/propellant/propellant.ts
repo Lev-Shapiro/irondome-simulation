@@ -1,5 +1,6 @@
 
 import { ForceThrust } from "@/simulation/physics/force/force-thrust";
+import { FuelExhaust } from "@/simulation/physics/fuel/fuel-exhaust";
 import { Gravity } from "@/simulation/physics/gravity/gravity";
 import { Mass } from "@/simulation/physics/mass/mass";
 import { Time } from "@/simulation/physics/time/time";
@@ -42,26 +43,15 @@ export class MissilePropellant {
     return this._fuelRemaining;
   }
 
-  /**
-   * Returns the rate at which the fuel is consumed, in units of
-   * kilograms per second. This is calculated as the maximum thrust
-   * force divided by the product of the specificImpulse (in seconds) and
-   * the gravitational acceleration of the world.
-   */
-  get fuelBurnRate(): Mass {
-    return Mass.createKilograms(
-      this.maxThrustForce.newtons /
-        (this.specificImpulse.seconds * Gravity.metersPerSecondSquared.value)
-    );
+
+  get fuelExhaustRate(): FuelExhaust {
+    return FuelExhaust.createKilogramsPerSecond(this.maxThrustForce.newtons /
+      (this.specificImpulse.seconds * Math.abs(Gravity.metersPerSecondSquared)))
   }
 
-  /**
-   * Returns the time (in seconds) that the propellant will take to finish burning,
-   * given the current amount of fuel remaining and the burn rate.
-   */
-  get fuelBurnTime(): Time {
+  get remainingExhaustTime(): Time {
     // .kilograms, because thrust force is in Newtons, which is related to kg, not g.
-    const time = this.fuelRemaining.kilograms / this.fuelBurnRate.kilograms;
+    const time = this.fuelRemaining.kilograms / this.fuelExhaustRate.kilogramsPerSecond;
 
     return Time.createSeconds(time);
   }
@@ -74,37 +64,16 @@ export class MissilePropellant {
     return (this.fuelRemaining.grams / this._fuelCapacity.grams) * 100;
   }
 
-  /**
-   * Calculates the thrust force provided by the propellant during a given time
-   * frame. If the fuel is not sufficient for the full time frame, the remaining
-   * fuel is used and the function returns a thrust force that is proportional to the
-   * amount of fuel left. If the fuel is empty, returns null.
-   * @param timeframe The time frame for which to calculate the thrust force.
-   * @returns The thrust force provided by the propellant during the given time frame,
-   * or null if the fuel is empty.
-   */
-  burnPerTimeFrame(timeframe: Time): ForceThrust | null {
-    if (this.fuelRemaining.grams === 0) return null;
+  exhaustBallistically(timeframe: Time) {
+    if(this._fuelRemaining.kilograms === 0) return null;
 
-    const burnRatePerTimeframe = this.fuelBurnRate.clone().multiply(timeframe.seconds);
-    const maxThrustForcePerTimeframe = this.maxThrustForce.clone().multiply(timeframe.seconds);
+    const burnAvailable = Math.min(this.remainingExhaustTime.seconds / timeframe.seconds, 1);
+    const thrustForce = this.maxThrustForce.newtons * timeframe.seconds;
 
-    console.log(timeframe.seconds)
-    console.log(burnRatePerTimeframe.kilograms, maxThrustForcePerTimeframe.newtons);
-    const burnAmountBeforeEmpty =
-      this.fuelRemaining.kilograms / burnRatePerTimeframe.kilograms;
+    (burnAvailable === 1)
+      ? this.fuelRemaining.decrease(this.fuelExhaustRate.getAsMassPerTimeframe(timeframe))
+      : this.fuelRemaining.emptify();
 
-    // Fuel is sufficient for full burn:
-    if (burnAmountBeforeEmpty >= 1) {
-      this.fuelRemaining.decrease(burnRatePerTimeframe);
-
-      return ForceThrust.create(maxThrustForcePerTimeframe.newtons);
-    }
-
-    // Fuel is PARTLY sufficient for burn:
-    this.fuelRemaining.emptify();
-
-    // burnAmountBeforeEmpty will be between 0 and 1.
-    return ForceThrust.create(maxThrustForcePerTimeframe.newtons * burnAmountBeforeEmpty);
+    return ForceThrust.create(thrustForce * burnAvailable);
   }
 }

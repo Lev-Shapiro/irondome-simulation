@@ -1,5 +1,5 @@
-import { Coords } from "@/simulation/coords";
 import { Angle } from "@/simulation/physics/angle/angle";
+import { Coords } from "@/simulation/physics/coords/coords";
 import { Distance } from "@/simulation/physics/distance/distance";
 import { ForceThrust } from "@/simulation/physics/force/force-thrust";
 import { Mass } from "@/simulation/physics/mass/mass";
@@ -79,7 +79,7 @@ export const gradRocket = new Missile({
   coords: clearCoords,
   dryMass: Mass.createKilograms(66), // Total mass
   direction: Angle.createDegreeAngle(0),
-  size: Size.init(Distance.createMeters(2.87), Distance.createMeters(0.122)), // Length: 2.87 m, Diameter: 122 mm
+  size: Size.init(Distance.createMeters(2.87), Distance.createMeters(0.122)),
   propellant: new MissilePropellant({
     maxThrustForce: ForceThrust.create(7200), // Estimated
     specificImpulse: Time.createSeconds(210), // Estimated
@@ -93,7 +93,7 @@ export const qassam3 = new Missile({
   coords: clearCoords,
   dryMass: Mass.createKilograms(90), // Approximate total mass
   direction: Angle.createDegreeAngle(0),
-  size: Size.init(Distance.createMeters(2.2), Distance.createMeters(0.17)), // Length: 2.2 m, Diameter: 170 mm
+  size: Size.init(Distance.createMeters(2.2), Distance.createMeters(0.17)),
   propellant: new MissilePropellant({
     maxThrustForce: ForceThrust.create(4000), // Estimated
     specificImpulse: Time.createSeconds(150), // Estimated

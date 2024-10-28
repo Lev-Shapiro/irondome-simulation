@@ -1,12 +1,11 @@
-import { Scalar } from "../scalar/scalar";
 import { TimeUnit } from "./time-unit";
 
 export class Time {
-  private readonly _time: Scalar;
+  private readonly _time: number;
   private readonly _unit: TimeUnit;
 
-  private constructor(time: Scalar, unit: TimeUnit) {
-    const timeValue = time.value;
+  private constructor(time: number, unit: TimeUnit) {
+    const timeValue = time;
 
     if (timeValue < 0) {
       throw new Error("Time value must be non-negative");
@@ -19,13 +18,13 @@ export class Time {
   get milliseconds(): number {
     switch (this._unit) {
       case TimeUnit.MILLISECOND:
-        return this._time.value;
+        return this._time;
       case TimeUnit.SECOND:
-        return this._time.value * 1000;
+        return this._time * 1000;
       case TimeUnit.MINUTE:
-        return this._time.value * 60 * 1000;
+        return this._time * 60 * 1000;
       case TimeUnit.HOUR:
-        return this._time.value * 60 * 60 * 1000;
+        return this._time * 60 * 60 * 1000;
     }
   }
 
@@ -56,35 +55,19 @@ export class Time {
     }
   }
 
-  /**
-   * Increases the time by the given amount.
-   * @param timeToAdd The amount of time to add.
-   */
-  increase(timeToAdd: Time) {
-    this._time.add(timeToAdd.getAs(this._unit))
-  }
-
-  /**
-   * Decreases the time by the given amount.
-   * @param timeToDeduct The amount of time to deduct.
-   */
-  decrease(timeToDeduct: Time) {
-    this._time.subtract(timeToDeduct.getAs(this._unit))
-  }
-
   static createMilliseconds(time: number): Time {
-    return new Time(Scalar.create(time), TimeUnit.MILLISECOND);
+    return new Time(time, TimeUnit.MILLISECOND);
   }
 
   static createSeconds(time: number): Time {
-    return new Time(Scalar.create(time), TimeUnit.SECOND);
+    return new Time(time, TimeUnit.SECOND);
   }
 
   static createMinutes(time: number): Time {
-    return new Time(Scalar.create(time), TimeUnit.MINUTE);
+    return new Time(time, TimeUnit.MINUTE);
   }
 
   static createHours(time: number): Time {
-    return new Time(Scalar.create(time), TimeUnit.HOUR);
+    return new Time(time, TimeUnit.HOUR);
   }
 }

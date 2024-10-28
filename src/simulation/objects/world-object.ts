@@ -1,10 +1,9 @@
-import { Coords } from "../coords";
 import { Angle } from "../physics/angle/angle";
+import { Coords } from "../physics/coords/coords";
 import { Force } from "../physics/force/force";
 import { Gravity } from "../physics/gravity/gravity";
 import { Mass } from "../physics/mass/mass";
 import { Time } from "../physics/time/time";
-import { Vector } from "../physics/vector/vector";
 import { Velocity } from "../physics/velocity/velocity";
 import { Size } from "../size";
 
@@ -22,7 +21,7 @@ export abstract class WorldObject {
   private readonly _coords: Coords;
   private readonly _size: Size;
   private _direction: Angle;
-  private readonly _velocity: Velocity = Velocity.initMetersPerSecond(0);
+  private _velocity: Velocity = Velocity.initMetersPerSecond(0, 0);
 
   constructor(props: WorldObjectProps) {
     this.id = props.id;
@@ -57,28 +56,35 @@ export abstract class WorldObject {
     return this._dryMass;
   }
 
+  /**
+   * Calculates the weight of the object as a force per second.
+   * This is based on the object's mass and the gravitational force.
+   * 
+   * @returns {Force} The gravitational force acting on the object per second.
+   */
+  get weight(): Force {
+    return Gravity.getWeightForcePerSecond(this.mass);
+  }
+
   get velocityMetersPerSecond() {
     return this._velocity.metersPerSecond;
   }
 
-  private get velocityAsVector(): Vector {
-    return Vector.create(
-      this._velocity.metersPerSecond.clone().multiply(this.mass.kilograms),
-      this.direction
-    );
-  }
-
   increaseVelocityFromForce(force: Force) {
-    this._velocity.increase(
-      Velocity.initMetersPerSecond(force.newtons / this.mass.kilograms)
+    this._velocity.addVelocity(
+      Velocity.initMetersPerSecond(force.axisX / this.mass.kilograms, force.axisY / this.mass.kilograms)
     );
+
+    return 
   }
 
-  getWeightForcePerTimeframe(timeframe: Time) {
-    return Gravity.getWeightForce(this.mass).clone().getMultipliedBy(timeframe.seconds);
+  getWeightForcePerTimeframe(timeframe: Time): Force {
+    return Force.create(this.weight.newtons * timeframe.seconds, this.direction);
   }
 
-  getVelocityVectorPerTimeframe(timeframe: Time) {
-    return this.velocityAsVector.clone().getMultipliedBy(timeframe.seconds);
+  getVelocityPerTimeframe(timeframe: Time) {
+    const vector = this._velocity.getAsVector().getMultipliedBy(timeframe.seconds);
+
+    return Velocity.initMetersPerSecond(vector.axisX, vector.axisY)
   }
 }

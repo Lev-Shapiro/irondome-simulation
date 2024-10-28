@@ -2,7 +2,9 @@ import { Distance } from "@/simulation/physics/distance/distance";
 import { Force } from "@/simulation/physics/force/force";
 import { Mass } from "@/simulation/physics/mass/mass";
 import { Time } from "@/simulation/physics/time/time";
+import { Vector } from "@/simulation/physics/vector/vector";
 import { VectorService } from "@/simulation/physics/vector/vector.service";
+import { ConsoleStep } from "@shapilev/console-step";
 import { WorldObject, WorldObjectProps } from "../world-object";
 import { MissilePropellant } from "./propellant/propellant";
 
@@ -42,32 +44,47 @@ export class Missile extends WorldObject {
   }
 
   burnIncludingOtherForcesPerTimeframe(timeframe: Time) {
-    const burnThrust = this._propellant.burnPerTimeFrame(timeframe);
+    const burnThrust = this._propellant.exhaustBallistically(timeframe);
+    const burnVector = (
+      burnThrust
+        ? burnThrust.getAsForceWithKnownDirection(this.direction)
+        : Force.empty()
+    );
+
+    const weightForce = this.getWeightForcePerTimeframe(timeframe);
 
     const bodyVectorPerBurn = VectorService.getVectorSum([
-      this.getWeightForcePerTimeframe(timeframe).vector,
-      // this.getVelocityVectorPerTimeframe(timeframe),
-      (burnThrust ? burnThrust.getAsForceWithKnownDirection(this.direction) : Force.empty()).vector,
+      weightForce,
+      burnVector,
     ]);
 
-    if(burnThrust) {
-      this.increaseVelocityFromForce(Force.fromVector(bodyVectorPerBurn));
-    }
+    const velocityVector = this.getVelocityPerTimeframe(timeframe);
+
+    new ConsoleStep("Missile").logAfter((s) => {
+      s.createStepObject({
+        gravity: gravityVector.axisY,
+        thrust: burnThrust ? (burnThrust?.newtons + "N") : "N/A",
+        velocity: this.velocityMetersPerSecond.value,
+        coords: this.coords.textified,
+        angle: this.direction.degrees,
+      });
+    });
 
     const finalVector = VectorService.getVectorSum([
-      this.getVelocityVectorPerTimeframe(timeframe),
+      velocityVector,
       bodyVectorPerBurn,
     ]);
 
-    return {
-      axisX: Distance.createMeters(finalVector.axisX),
-      axisY: Distance.createMeters(finalVector.axisY),
-    }
+    // Increase the velocity at the end of the method, so that it can be used in the next step, not this.
+    this.increaseVelocityFromForce(Force.fromVector(bodyVectorPerBurn));
+
+    return finalVector;
   }
 
-  move(axisX: Distance, axisY: Distance) {
-    this.coords.x.increase(axisX);
-    this.coords.y.increase(axisY);
+  move(vector: Vector) {
+    this.coords.x.increase(Distance.createMeters(vector.axisX / this.mass.kilograms));
+    this.coords.y.increase(Distance.createMeters(vector.axisY / this.mass.kilograms));
+    this.setAngle(vector.direction);
 
     return this.coords;
   }

@@ -40,12 +40,12 @@ export const useGame = (app: Application | undefined) => {
       setInterval(() => {
         const force = missile.burnIncludingOtherForcesPerTimeframe(INTERVAL_TIME);
         
-        missile.move(force.axisX, force.axisY);
-        console.log({ x: missile.coords.x.kilometers, y: missile.coords.y.kilometers, speed: missile.velocityMetersPerSecond.value + "m/s" });
+        missile.move(force.deltaX, force.deltaY);
+        console.log({ x: missile.coords.x.kilometers, y: missile.coords.y.kilometers, speed: missile.velocityMetersPerSecond + "m/s" });
         
         missileCanvasEl.x = toSimulation(missile.coords.x);
         missileCanvasEl.y = toSimulation(missile.coords.y);
-      }, INTERVAL_TIME.milliseconds);
+      }, INTERVAL_TIME.milliseconds / 2);
 
       console.log("No more fuel");
     };

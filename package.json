@@ -9,10 +9,11 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "manual": "npx ts-node src/manual.ts"
+    "manual": "npx tsc src/manual"
   },
   "dependencies": {
     "@pixi/react": "^7.1.2",
+    "@shapilev/console-step": "^1.0.9",
     "next": "14.2.15",
     "pixi.js": "^7.4.2",
     "react": "^18",

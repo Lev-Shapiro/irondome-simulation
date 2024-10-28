@@ -1,34 +1,93 @@
 import { Angle } from "../angle/angle";
-import { Scalar } from "../scalar/scalar";
+import { Distance } from "../distance/distance";
+import { Force } from "../force/force";
 
-export class Vector {
-  readonly magnitude: Scalar;
-  readonly direction: Angle;
+// export class Vector {
+//   private readonly _magnitude: number;
+//   readonly direction: Angle;
 
-  constructor(magnitude: Scalar, direction: Angle) {
-    this.magnitude = magnitude;
-    this.direction = direction;
+//   constructor(magnitude: number, direction: Angle) {
+//     this._magnitude = magnitude;
+//     this.direction = direction;
+//   }
+
+//   /**
+//  * Determines if the vector's direction is in the positive direction.
+//  * The direction is considered positive if the angle, normalized to [0, 2π),
+//  * is less than π radians. This effectively checks if the angle is in the 
+//  * range from 0 to π radians, which corresponds to the positive x-axis 
+//  * and the upper half-plane in a standard Cartesian coordinate system.
+//  */
+//   get isPositiveDirection() {
+//     const fullCircle = 2 * Math.PI;
+
+//     // Normalize the angle to [0, 2π)
+//     const normalizedAngle = ((this.direction.radians % fullCircle) + fullCircle) % fullCircle;
+
+//     // Determine if the angle is in the positive direction
+//     return normalizedAngle < Math.PI;
+//   }  
+
+//   get magnitude() {
+//     return this._magnitude * (this.isPositiveDirection ? 1 : -1);
+//   }
+
+//   get axisX() {
+//     return this._magnitude * Math.cos(this.direction.radians);
+//   }
+
+//   get axisY() {
+//     return this._magnitude * Math.sin(this.direction.radians);
+//   }
+
+//   get byFactors() {
+//     return { axisX: this.axisX, axisY: this.axisY }
+//   }
+// }
+
+export type MagnitudeOfVector = Distance | Force;
+
+export abstract class Vector<T extends MagnitudeOfVector> {
+  private readonly _magnitude: T;
+  private readonly _direction: Angle;
+
+  constructor(magnitude: T, direction: Angle) {
+    this._magnitude = magnitude;
+    this._direction = direction;
   }
 
-  clone() {
-    return new Vector(this.magnitude.clone(), this.direction.clone());
+  get magnitude() {
+    return this._magnitude
   }
 
-  getMultipliedBy(amount: number) {
-    this.magnitude.multiply(amount);
+  abstract get axisX(): T;
+  abstract get axisY(): T;
 
-    return this;
+  get factors() {
+    return {
+      axisX: this.axisX,
+      axisY: this.axisY
+    }
   }
 
-  get axisX() {
-    return this.magnitude.value * Math.cos(this.direction.radians);
+  get direction() {
+    return this._direction
   }
 
-  get axisY() {
-    return this.magnitude.value * Math.sin(this.direction.radians);
-  }
+  /**
+ * Determines if the vector's direction is in the positive direction.
+ * The direction is considered positive if the angle, normalized to [0, 2π),
+ * is less than π radians. This effectively checks if the angle is in the 
+ * range from 0 to π radians, which corresponds to the positive x-axis 
+ * and the upper half-plane in a standard Cartesian coordinate system.
+ */
+  get isPositiveDirection() {
+    const fullCircle = 2 * Math.PI;
 
-  static create(magnitude: Scalar, direction: Angle) {
-    return new Vector(magnitude, direction);
+    // Normalize the angle to [0, 2π)
+    const normalizedAngle = ((this.direction.radians % fullCircle) + fullCircle) % fullCircle;
+
+    // Determine if the angle is in the positive direction
+    return normalizedAngle < Math.PI;
   }
 }

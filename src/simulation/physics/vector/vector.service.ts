@@ -1,23 +1,22 @@
 import { Angle } from "../angle/angle";
-import { Scalar } from "../scalar/scalar";
 import { Vector } from "./vector";
 
 export class VectorService {
   static getVectorSum(vectors: Vector[]) {
-    const magnitudeX = Scalar.create(0),
-      magnitudeY = Scalar.create(0);
+    let magnitudeX = 0,
+      magnitudeY = 0;
 
     for (const vector of vectors) {
-      magnitudeX.add(vector.axisX);
-      magnitudeY.add(vector.axisY);
+      magnitudeX += vector.axisX;
+      magnitudeY += vector.axisY;
     }
 
-    const sumVectorMagnitude = Scalar.create(
-      Math.sqrt(Math.pow(magnitudeX.value, 2) + Math.pow(magnitudeY.value, 2))
+    const sumVectorMagnitude = Math.sqrt(
+      Math.pow(magnitudeX, 2) + Math.pow(magnitudeY, 2)
     );
 
     const sumVectorAngle = Angle.createRadianAngle(
-      Math.atan2(magnitudeY.value, magnitudeX.value)
+      Math.atan2(magnitudeY, magnitudeX)
     );
 
     return Vector.create(sumVectorMagnitude, sumVectorAngle);

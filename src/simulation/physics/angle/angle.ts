@@ -1,12 +1,11 @@
-import { Scalar } from "../scalar/scalar";
 import { AngleUnit } from "./angle-unit";
 
 export class Angle {
-  private readonly _angle: Scalar;
+  private readonly _angle: number;
   private readonly _unit: AngleUnit;
 
-  private constructor(angle: Scalar, unit: AngleUnit) {
-    const angleValue = angle.value;
+  private constructor(angle: number, unit: AngleUnit) {
+    const angleValue = angle;
 
     switch (unit) {
       case AngleUnit.DEGREES:
@@ -30,27 +29,23 @@ export class Angle {
     this._unit = unit;
   }
 
-  clone() {
-    return new Angle(this._angle.clone(), this._unit);
-  }
-
   get degrees() {
     return  this._unit === AngleUnit.DEGREES
-      ? this._angle.value
-      : (this._angle.value / Math.PI) * 180;
+      ? this._angle
+      : (this._angle / Math.PI) * 180;
   }
 
   get radians() {
     return this._unit === AngleUnit.RADIANS
-      ? this._angle.value
-      : (this._angle.value / 180) * Math.PI;
+      ? this._angle
+      : (this._angle / 180) * Math.PI;
   }
 
   static createDegreeAngle(angle: number) {
-    return new Angle(Scalar.create(angle), AngleUnit.DEGREES);
+    return new Angle(angle, AngleUnit.DEGREES);
   }
 
   static createRadianAngle(angle: number) {
-    return new Angle(Scalar.create(angle), AngleUnit.RADIANS);
+    return new Angle(angle, AngleUnit.RADIANS);
   }
 }

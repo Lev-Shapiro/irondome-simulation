@@ -1,11 +1,10 @@
-import { Scalar } from "../scalar/scalar";
 import { DistanceUnit } from "./distance-unit";
 
 export class Distance {
-  private _distance: Scalar;
+  private _distance: number;
   private readonly _unit: DistanceUnit;
 
-  private constructor(distance: Scalar, unit: DistanceUnit) {
+  private constructor(distance: number, unit: DistanceUnit) {
     this._distance = distance;
     this._unit = unit;
   }
@@ -13,13 +12,13 @@ export class Distance {
   get millimeters(): number {
     switch (this._unit) {
       case DistanceUnit.MILLIMETER:
-        return this._distance.value;
+        return this._distance;
       case DistanceUnit.CENTIMETER:
-        return this._distance.value * 10;
+        return this._distance * 10;
       case DistanceUnit.METER:
-        return this._distance.value * 1000;
+        return this._distance * 1000;
       case DistanceUnit.KILOMETER:
-        return this._distance.value * 1000000;
+        return this._distance * 1000000;
       default:
         throw new Error(`Unsupported DistanceUnit: ${this._unit}`);
     }
@@ -53,24 +52,22 @@ export class Distance {
   }
 
   increase(distanceToAdd: Distance) {
-    const distanceToIdenticalUnit = distanceToAdd.getAs(this._unit)
-    
-    this._distance.add(distanceToIdenticalUnit)
+    return Distance.createCentimeters(this.centimeters + distanceToAdd.centimeters)
   }
 
   static createMillimeters(distance: number): Distance {
-    return new Distance(Scalar.create(distance), DistanceUnit.MILLIMETER);
+    return new Distance(distance, DistanceUnit.MILLIMETER);
   }
 
   static createCentimeters(distance: number): Distance {
-    return new Distance(Scalar.create(distance), DistanceUnit.CENTIMETER);
+    return new Distance(distance, DistanceUnit.CENTIMETER);
   }
 
   static createMeters(distance: number): Distance {
-    return new Distance(Scalar.create(distance), DistanceUnit.METER);
+    return new Distance(distance, DistanceUnit.METER);
   }
 
   static createKilometers(distance: number): Distance {
-    return new Distance(Scalar.create(distance), DistanceUnit.KILOMETER);
+    return new Distance(distance, DistanceUnit.KILOMETER);
   }
 }
