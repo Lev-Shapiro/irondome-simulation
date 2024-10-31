@@ -1,51 +1,8 @@
 import { Angle } from "../angle/angle";
-import { Distance } from "../distance/distance";
 import { Force } from "../force/force";
+import { Speed } from "../speed/speed";
 
-// export class Vector {
-//   private readonly _magnitude: number;
-//   readonly direction: Angle;
-
-//   constructor(magnitude: number, direction: Angle) {
-//     this._magnitude = magnitude;
-//     this.direction = direction;
-//   }
-
-//   /**
-//  * Determines if the vector's direction is in the positive direction.
-//  * The direction is considered positive if the angle, normalized to [0, 2π),
-//  * is less than π radians. This effectively checks if the angle is in the 
-//  * range from 0 to π radians, which corresponds to the positive x-axis 
-//  * and the upper half-plane in a standard Cartesian coordinate system.
-//  */
-//   get isPositiveDirection() {
-//     const fullCircle = 2 * Math.PI;
-
-//     // Normalize the angle to [0, 2π)
-//     const normalizedAngle = ((this.direction.radians % fullCircle) + fullCircle) % fullCircle;
-
-//     // Determine if the angle is in the positive direction
-//     return normalizedAngle < Math.PI;
-//   }  
-
-//   get magnitude() {
-//     return this._magnitude * (this.isPositiveDirection ? 1 : -1);
-//   }
-
-//   get axisX() {
-//     return this._magnitude * Math.cos(this.direction.radians);
-//   }
-
-//   get axisY() {
-//     return this._magnitude * Math.sin(this.direction.radians);
-//   }
-
-//   get byFactors() {
-//     return { axisX: this.axisX, axisY: this.axisY }
-//   }
-// }
-
-export type MagnitudeOfVector = Distance | Force;
+export type MagnitudeOfVector = Speed | Force;
 
 export abstract class Vector<T extends MagnitudeOfVector> {
   private readonly _magnitude: T;
@@ -90,4 +47,6 @@ export abstract class Vector<T extends MagnitudeOfVector> {
     // Determine if the angle is in the positive direction
     return normalizedAngle < Math.PI;
   }
+
+  abstract get textified(): string
 }

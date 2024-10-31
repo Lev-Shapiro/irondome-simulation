@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "manual": "npx tsc src/manual"
+    "manual": "clear && clear && npx tsx src/manual"
   },
   "dependencies": {
     "@pixi/react": "^7.1.2",

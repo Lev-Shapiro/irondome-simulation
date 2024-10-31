@@ -1,12 +1,11 @@
-
-import { ForceThrust } from "@/simulation/physics/force/force-thrust";
+import { Force } from "@/simulation/physics/force/force";
 import { FuelExhaust } from "@/simulation/physics/fuel/fuel-exhaust";
 import { Gravity } from "@/simulation/physics/gravity/gravity";
 import { Mass } from "@/simulation/physics/mass/mass";
 import { Time } from "@/simulation/physics/time/time";
 
 interface MissilePropellantProps {
-  maxThrustForce: ForceThrust;
+  maxThrustForce: Force;
   specificImpulse: Time;
   fuelCapacity: Mass;
   fuelLoaded: Mass;
@@ -16,7 +15,7 @@ export class MissilePropellant {
   private _fuelCapacity: Mass;
   private _fuelRemaining: Mass;
 
-  readonly maxThrustForce: ForceThrust;
+  readonly maxThrustForce: Force;
   readonly specificImpulse: Time; // formally known as Specific Impulse
 
   constructor(props: MissilePropellantProps) {
@@ -31,7 +30,7 @@ export class MissilePropellant {
       maxThrustForce: this.maxThrustForce,
       specificImpulse: this.specificImpulse,
       fuelCapacity: this._fuelCapacity,
-      fuelLoaded: this.fuelRemaining,
+      fuelLoaded: this._fuelRemaining,
     });
   }
 
@@ -39,19 +38,22 @@ export class MissilePropellant {
     return this._fuelCapacity;
   }
 
-  get fuelRemaining() {
-    return this._fuelRemaining;
+  get fuelRemainingInKilograms() {
+    return this._fuelRemaining.kilograms;
   }
 
-
   get fuelExhaustRate(): FuelExhaust {
-    return FuelExhaust.createKilogramsPerSecond(this.maxThrustForce.newtons /
-      (this.specificImpulse.seconds * Math.abs(Gravity.metersPerSecondSquared)))
+    return FuelExhaust.createKilogramsPerSecond(
+      this.maxThrustForce.newtons /
+        (this.specificImpulse.seconds *
+          Math.abs(Gravity.metersPerSecondSquared))
+    );
   }
 
   get remainingExhaustTime(): Time {
     // .kilograms, because thrust force is in Newtons, which is related to kg, not g.
-    const time = this.fuelRemaining.kilograms / this.fuelExhaustRate.kilogramsPerSecond;
+    const time =
+      this._fuelRemaining.kilograms / this.fuelExhaustRate.kilogramsPerSecond;
 
     return Time.createSeconds(time);
   }
@@ -61,19 +63,29 @@ export class MissilePropellant {
    * @returns {number} The percentage of fuel remaining.
    */
   get fuelUsagePercent(): number {
-    return (this.fuelRemaining.grams / this._fuelCapacity.grams) * 100;
+    return (this._fuelRemaining.grams / this._fuelCapacity.grams) * 100;
   }
 
   exhaustBallistically(timeframe: Time) {
-    if(this._fuelRemaining.kilograms === 0) return null;
+    if (this._fuelRemaining.kilograms === 0) return null;
 
-    const burnAvailable = Math.min(this.remainingExhaustTime.seconds / timeframe.seconds, 1);
-    const thrustForce = this.maxThrustForce.newtons * timeframe.seconds;
+    // from 0 to 1
+    const maxBurnPercentage = Math.min(
+      this.remainingExhaustTime.seconds / timeframe.seconds,
+      1
+    );
 
-    (burnAvailable === 1)
-      ? this.fuelRemaining.decrease(this.fuelExhaustRate.getAsMassPerTimeframe(timeframe))
-      : this.fuelRemaining.emptify();
+    const thrustForce = new Force(this.maxThrustForce.newtons * timeframe.seconds);
 
-    return ForceThrust.create(thrustForce * burnAvailable);
+    const fuelFullBurnMass =
+      this.fuelExhaustRate.getAsMassPerTimeframe(timeframe);
+
+    this._fuelRemaining = Mass.createGrams(
+      maxBurnPercentage === 1
+        ? this._fuelRemaining.grams - fuelFullBurnMass.grams
+        : 0
+    );
+
+    return new Force(thrustForce.getAsMultipliedBy(maxBurnPercentage).newtons);
   }
 }

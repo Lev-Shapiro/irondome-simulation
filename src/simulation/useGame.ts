@@ -3,6 +3,7 @@ import { Application, Assets, Sprite } from "pixi.js";
 import { useEffect, useMemo } from "react";
 import { qassam3 } from "./objects/missile/missile.dataset";
 import { Angle } from "./physics/angle/angle";
+import { Distance } from "./physics/distance/distance";
 import { Time } from "./physics/time/time";
 
 const missile = qassam3.clone();
@@ -30,21 +31,21 @@ export const useGame = (app: Application | undefined) => {
       missileCanvasEl.width = missileSize.width;
       missileCanvasEl.height = missileSize.height;
       missileCanvasEl.rotation = Math.PI - missile.direction.radians;
-      missileCanvasEl.x = toSimulation(missile.coords.x)
-      missileCanvasEl.y = toSimulation(missile.coords.y)
+      missileCanvasEl.x = toSimulation(Distance.createMeters(missile.coords.axisXmeters))
+      missileCanvasEl.y = toSimulation(Distance.createMeters(missile.coords.axisYmeters))
 
       // app.stage.addChild(missileCanvasEl);
 
       const INTERVAL_TIME = Time.createSeconds(1);
       
       setInterval(() => {
-        const force = missile.burnIncludingOtherForcesPerTimeframe(INTERVAL_TIME);
+        const { coords, direction } = missile.burn(INTERVAL_TIME);
         
-        missile.move(force.deltaX, force.deltaY);
-        console.log({ x: missile.coords.x.kilometers, y: missile.coords.y.kilometers, speed: missile.velocityMetersPerSecond + "m/s" });
+        console.log({ x: coords.x.kilometers, y: coords.y.kilometers, speed: missile.velocityMetersPerSecond + "m/s" });
         
-        missileCanvasEl.x = toSimulation(missile.coords.x);
-        missileCanvasEl.y = toSimulation(missile.coords.y);
+        missileCanvasEl.x = toSimulation(coords.x);
+        missileCanvasEl.y = toSimulation(coords.y);
+        missileCanvasEl.rotation = direction.radians;
       }, INTERVAL_TIME.milliseconds / 2);
 
       console.log("No more fuel");

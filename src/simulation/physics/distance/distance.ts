@@ -51,7 +51,7 @@ export class Distance {
     }
   }
 
-  increase(distanceToAdd: Distance) {
+  getAsIncreased(distanceToAdd: Distance) {
     return Distance.createCentimeters(this.centimeters + distanceToAdd.centimeters)
   }
 

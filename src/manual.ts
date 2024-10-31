@@ -1,6 +1,3 @@
-import { gradRocket } from "./simulation/objects/missile/missile.dataset";
-import { Angle } from "./simulation/physics/angle/angle";
-import { Time } from "./simulation/physics/time/time";
 
 // Missile{
 //   gravity: -1346.2643333333333
@@ -18,20 +15,31 @@ import { Time } from "./simulation/physics/time/time";
 //   angle: 10.687014021130313
 //   }
 
-const missile = gradRocket.clone();
-missile.setAngle(Angle.createDegreeAngle(45));
+import { ConsoleStep, StepVariety } from "@shapilev/console-step";
+import { qassam3 } from "./simulation/objects/missile/missile.dataset";
+import { Angle } from "./simulation/physics/angle/angle";
+import { Time } from "./simulation/physics/time/time";
+
+const missile = qassam3.clone();
+missile.setAngle(Angle.createDegreeAngle(80));
 
 const INTERVAL_TIME = Time.createSeconds(0.5);
       
 let i = 0;
 const interval = setInterval(() => {
-  const deltaVector = missile.burnIncludingOtherForcesPerTimeframe(INTERVAL_TIME);
-
-  // incorrectly changes the angle of the missile
-  missile.move(deltaVector);
   i++;
 
-  if(missile.coords.y.millimeters <= 0) {
+  const { coords, direction } = missile.move(INTERVAL_TIME)  
+
+  new ConsoleStep(`(${coords.x.kilometers}km, ${coords.y.kilometers}km)`).logAfter(s => {
+    s.createStep("Velocity: " + missile.velocityVector.metersPerSecond + "[m/s]")
+    
+    if(missile.isNoFuelRemaining) {
+      s.createStep("No fuel", StepVariety.Warning)
+    }
+  })
+
+  if(missile.coords.axisYmeters <= 0) {
     console.log(`Took ${i} seconds to turn at 0 degrees`)
     clearInterval(interval)
     return;

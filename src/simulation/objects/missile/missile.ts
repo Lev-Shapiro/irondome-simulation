@@ -1,10 +1,10 @@
 import { Distance } from "@/simulation/physics/distance/distance";
 import { Force } from "@/simulation/physics/force/force";
 import { Mass } from "@/simulation/physics/mass/mass";
+import { MotionService } from "@/simulation/physics/motion-service";
+import { Speed } from "@/simulation/physics/speed/speed";
 import { Time } from "@/simulation/physics/time/time";
-import { Vector } from "@/simulation/physics/vector/vector";
-import { VectorService } from "@/simulation/physics/vector/vector.service";
-import { ConsoleStep } from "@shapilev/console-step";
+import { ForceVector } from "@/simulation/physics/vector/force-vector";
 import { WorldObject, WorldObjectProps } from "../world-object";
 import { MissilePropellant } from "./propellant/propellant";
 
@@ -29,63 +29,75 @@ export class Missile extends WorldObject {
       size: this.size, // Length: 2.2 m, Diameter: 170 mm
       direction: this.direction,
       propellant: this._propellant.clone(),
+      speed: Speed.createMetersPerSecond(this.velocityVector.metersPerSecond),
     });
   }
 
   get isNoFuelRemaining() {
-    return this._propellant.fuelRemaining.grams === 0;
+    return this._propellant.fuelUsagePercent === 0;
+  }
+
+  get fuelRemainingInKilograms() {
+    return this._propellant.fuelRemainingInKilograms;
   }
 
   // Missile has propellant mass, thus the mass should be reinitialized and calculated
   get mass() {
     return Mass.createKilograms(
-      this.dryMass.kilograms + this._propellant.fuelRemaining.kilograms
+      this.dryMass.kilograms + this._propellant.fuelRemainingInKilograms
     );
   }
 
-  burnIncludingOtherForcesPerTimeframe(timeframe: Time) {
-    const burnThrust = this._propellant.exhaustBallistically(timeframe);
-    const burnVector = (
-      burnThrust
-        ? burnThrust.getAsForceWithKnownDirection(this.direction)
-        : Force.empty()
+  burnAndGetForce(timeframe: Time) {
+    const burnThrustForce = this._propellant.exhaustBallistically(timeframe);
+    const burnVector = new ForceVector(
+      burnThrustForce || new Force(0),
+      this.direction
     );
 
-    const weightForce = this.getWeightForcePerTimeframe(timeframe);
+    return burnVector;
+  }
 
-    const bodyVectorPerBurn = VectorService.getVectorSum([
+  move(timeframe: Time) {
+    const startVelocity = this.velocityVector;
+
+    // 1. Forces acting on the missile
+    const burnForce = this.burnAndGetForce(timeframe);
+    const weightForce = this.getWeightPerTimeframe(timeframe);
+
+    // 2. Deriving the velocity based on thrust and gravity.
+    const velocityDeltaAsForce = MotionService.getForceSum([
       weightForce,
-      burnVector,
+      burnForce,
     ]);
 
-    const velocityVector = this.getVelocityPerTimeframe(timeframe);
+    const velocityDelta = MotionService.getVelocityFromForce(
+      velocityDeltaAsForce,
+      this.mass
+    );
 
-    new ConsoleStep("Missile").logAfter((s) => {
-      s.createStepObject({
-        gravity: gravityVector.axisY,
-        thrust: burnThrust ? (burnThrust?.newtons + "N") : "N/A",
-        velocity: this.velocityMetersPerSecond.value,
-        coords: this.coords.textified,
-        angle: this.direction.degrees,
-      });
-    });
-
-    const finalVector = VectorService.getVectorSum([
-      velocityVector,
-      bodyVectorPerBurn,
+    // 3. Sum of prev velocity with the delta velocity
+    const netVelocity = MotionService.getVelocitySum([
+      startVelocity,
+      velocityDelta,
     ]);
 
-    // Increase the velocity at the end of the method, so that it can be used in the next step, not this.
-    this.increaseVelocityFromForce(Force.fromVector(bodyVectorPerBurn));
+    this.setVelocity(netVelocity);
 
-    return finalVector;
-  }
+    const x = this.coords.addX(
+      Distance.createMeters(
+        netVelocity.axisX.getAsMultipliedBy(timeframe.seconds).metersPerSecond
+      )
+    );
 
-  move(vector: Vector) {
-    this.coords.x.increase(Distance.createMeters(vector.axisX / this.mass.kilograms));
-    this.coords.y.increase(Distance.createMeters(vector.axisY / this.mass.kilograms));
-    this.setAngle(vector.direction);
+    const y = this.coords.addY(
+      Distance.createMeters(
+        netVelocity.axisY.getAsMultipliedBy(timeframe.seconds).metersPerSecond
+      )
+    );
 
-    return this.coords;
+    const direction = this.setAngle(netVelocity.direction);
+
+    return { coords: { x, y }, direction };
   }
 }

@@ -9,4 +9,8 @@ export class ForceVector extends Vector<Force> {
   get axisY() {
     return new Force(this.magnitude.newtons * Math.sin(this.direction.radians));
   }
+
+  get textified(): string {
+    return `(${this.magnitude.newtons.toFixed(3)}N, ${this.direction.degrees.toFixed(3)}deg)`
+  }
 }

@@ -4,7 +4,7 @@ export class Mass {
   private readonly _mass: number;
   private readonly _unit: MassUnit;
 
-  private constructor(mass: number, unit: MassUnit) {
+  constructor(mass: number, unit: MassUnit) {
     if (mass < 0) {
       throw new Error("Mass value must be non-negative");
     }
