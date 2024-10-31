@@ -1,6 +1,5 @@
 import { Angle } from "../physics/angle/angle";
 import { Coords } from "../physics/coords/coords";
-import { Force } from "../physics/force/force";
 import { Gravity } from "../physics/gravity/gravity";
 import { Mass } from "../physics/mass/mass";
 import { Speed } from "../physics/speed/speed";
