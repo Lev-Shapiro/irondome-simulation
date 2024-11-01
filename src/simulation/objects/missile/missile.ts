@@ -66,24 +66,23 @@ export class Missile extends WorldObject {
     const weightForce = this.getWeightPerTimeframe(timeframe);
 
     // 2. Deriving the velocity based on thrust and gravity.
-    const velocityDeltaAsForce = MotionService.getForceSum([
+    const accelerationAsForce = MotionService.getVectorForceSum([
       weightForce,
       burnForce,
     ]);
 
-    const velocityDelta = MotionService.getVelocityFromForce(
-      velocityDeltaAsForce,
+    const acceleration = MotionService.getAccelerationFromForce(
+      accelerationAsForce,
       this.mass
     );
-    // TODO: should the velocityDelta be multiplied by timeframe???
+
+    console.log("Acceleration", acceleration.metersPerSecond + "[m/s^2]");
 
     // 3. Sum of prev velocity with the delta velocity
-    const netVelocity = MotionService.getVelocitySum([
+    const netVelocity = MotionService.getVectorVelocitySum([
       startVelocity,
-      velocityDelta,
+      acceleration,
     ]);
-
-    this.setVelocity(netVelocity);
 
     const x = this.coords.addX(
       Distance.createMeters(
@@ -97,8 +96,9 @@ export class Missile extends WorldObject {
       )
     );
 
-    const direction = this.setAngle(netVelocity.direction);
+    this.angle = netVelocity.direction;
+    this.velocity = netVelocity;
 
-    return { coords: { x, y }, direction };
+    return { coords: { x, y }, direction: netVelocity.direction };
   }
 }

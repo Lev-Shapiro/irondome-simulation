@@ -77,14 +77,14 @@ export class MissilePropellant {
 
     const thrustForce = new Force(this.maxThrustForce.newtons * timeframe.seconds);
 
-    const fuelFullBurnMass =
-      this.fuelExhaustRate.getAsMassPerTimeframe(timeframe);
+    // const fuelFullBurnMass =
+    //   this.fuelExhaustRate.getAsMassPerTimeframe(timeframe);
 
-    this._fuelRemaining = Mass.createGrams(
-      maxBurnPercentage === 1
-        ? this._fuelRemaining.grams - fuelFullBurnMass.grams
-        : 0
-    );
+    // this._fuelRemaining = Mass.createGrams(
+    //   maxBurnPercentage === 1
+    //     ? this._fuelRemaining.grams - fuelFullBurnMass.grams
+    //     : 0
+    // );
 
     return new Force(thrustForce.getAsMultipliedBy(maxBurnPercentage).newtons);
   }
