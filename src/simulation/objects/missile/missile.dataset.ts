@@ -74,19 +74,6 @@ export const jerichoIII = new Missile({
 /*                               Hamas Missiles                               */
 /* -------------------------------------------------------------------------- */
 
-export const gradRocket = new Missile({
-  id: "grad-rocket",
-  coords: clearCoords,
-  dryMass: Mass.createKilograms(66), // Total mass
-  direction: Angle.createDegreeAngle(0),
-  size: Size.init(Distance.createMeters(2.87), Distance.createMeters(0.122)),
-  propellant: new MissilePropellant({
-    maxThrustForce: new Force(7200), // Estimated
-    specificImpulse: Time.createSeconds(210), // Estimated
-    fuelCapacity: Mass.createKilograms(20.45), // Approximate propellant mass
-    fuelLoaded: Mass.createKilograms(20.45),
-  }),
-});
 
 export const qassam3 = new Missile({
   id: "qassam-3",
@@ -99,6 +86,20 @@ export const qassam3 = new Missile({
     specificImpulse: Time.createSeconds(150), // Estimated
     fuelCapacity: Mass.createKilograms(50), // Estimated
     fuelLoaded: Mass.createKilograms(50),
+  }),
+});
+
+export const gradRocket = new Missile({
+  id: "grad-rocket",
+  coords: clearCoords,
+  dryMass: Mass.createKilograms(66), // Total mass
+  direction: Angle.createDegreeAngle(0),
+  size: Size.init(Distance.createMeters(2.87), Distance.createMeters(0.122)),
+  propellant: new MissilePropellant({
+    maxThrustForce: new Force(7200), // Estimated
+    specificImpulse: Time.createSeconds(210), // Estimated
+    fuelCapacity: Mass.createKilograms(20.45), // Approximate propellant mass
+    fuelLoaded: Mass.createKilograms(20.45),
   }),
 });
 

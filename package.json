@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "manual": "clear && clear && npx tsx src/manual"
+    "motion": "clear && clear && npx tsx src/missile-motion"
   },
   "dependencies": {
     "@pixi/react": "^7.1.2",

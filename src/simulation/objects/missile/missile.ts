@@ -75,6 +75,7 @@ export class Missile extends WorldObject {
       velocityDeltaAsForce,
       this.mass
     );
+    // TODO: should the velocityDelta be multiplied by timeframe???
 
     // 3. Sum of prev velocity with the delta velocity
     const netVelocity = MotionService.getVelocitySum([

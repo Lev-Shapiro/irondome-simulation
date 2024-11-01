@@ -21,10 +21,10 @@ import { Angle } from "./simulation/physics/angle/angle";
 import { Time } from "./simulation/physics/time/time";
 
 const missile = gradRocket.clone();
-missile.setAngle(Angle.createDegreeAngle(70));
+missile.setAngle(Angle.createDegreeAngle(60));
 
 
-const INTERVAL_TIME = Time.createMilliseconds(20);
+const INTERVAL_TIME = Time.createMilliseconds(500);
       
 let i = 0;
 const interval = setInterval(() => {
