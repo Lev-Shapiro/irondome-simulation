@@ -34,8 +34,8 @@ export abstract class WorldObject {
     this._speed = props.speed || Speed.createMetersPerSecond(0);
   }
 
-  setAngle(angle: Angle) {
-    return this._direction = angle;
+  set angle(angle: Angle) {
+    this._direction = angle;
   }
 
   get coords(): Coords {
@@ -70,19 +70,12 @@ export abstract class WorldObject {
   }
 
   get velocityVector() {
-    return new VelocityVector(Speed.createMetersPerSecond(this._speed.metersPerSecond), this.direction)
+    const speedWithinDifferentMemoryChunk = this._speed.getAsMultipliedBy(1);
+
+    return new VelocityVector(speedWithinDifferentMemoryChunk, this.direction)
   }
 
-  // addVelocity(velocityToAdd: VelocityVector) {
-  //   const totalVelocity = MotionService.getVelocitySum([
-  //     this.velocityVector, // current velocity vector
-  //     velocityToAdd,
-  //   ])
-
-  //   this._speed = Speed.createMetersPerSecond(totalVelocity.metersPerSecond)
-  // }
-
-  setVelocity(velocity: VelocityVector) {
+  set velocity(velocity: VelocityVector) {
     this._speed = Speed.createMetersPerSecond(velocity.metersPerSecond)
   }
 

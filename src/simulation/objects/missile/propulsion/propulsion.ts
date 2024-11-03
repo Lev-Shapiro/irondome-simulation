@@ -4,21 +4,21 @@ import { Gravity } from "@/simulation/physics/gravity/gravity";
 import { Mass } from "@/simulation/physics/mass/mass";
 import { Time } from "@/simulation/physics/time/time";
 
-interface MissilePropellantProps {
+export interface PropulsionSystemProps {
   maxThrustForce: Force;
   specificImpulse: Time;
   fuelCapacity: Mass;
   fuelLoaded: Mass;
 }
 
-export class MissilePropellant {
+export class PropulsionSystem {
   private _fuelCapacity: Mass;
   private _fuelRemaining: Mass;
 
   readonly maxThrustForce: Force;
   readonly specificImpulse: Time; // formally known as Specific Impulse
 
-  constructor(props: MissilePropellantProps) {
+  constructor(props: PropulsionSystemProps) {
     this.maxThrustForce = props.maxThrustForce;
     this.specificImpulse = props.specificImpulse;
     this._fuelCapacity = props.fuelCapacity;
@@ -26,7 +26,7 @@ export class MissilePropellant {
   }
 
   clone() {
-    return new MissilePropellant({
+    return new PropulsionSystem({
       maxThrustForce: this.maxThrustForce,
       specificImpulse: this.specificImpulse,
       fuelCapacity: this._fuelCapacity,
@@ -42,7 +42,7 @@ export class MissilePropellant {
     return this._fuelRemaining.kilograms;
   }
 
-  get fuelExhaustRate(): FuelExhaust {
+  get fuelBurnRate(): FuelExhaust {
     return FuelExhaust.createKilogramsPerSecond(
       this.maxThrustForce.newtons /
         (this.specificImpulse.seconds *
@@ -50,10 +50,9 @@ export class MissilePropellant {
     );
   }
 
-  get remainingExhaustTime(): Time {
-    // .kilograms, because thrust force is in Newtons, which is related to kg, not g.
+  get remainingBurnTime(): Time {
     const time =
-      this._fuelRemaining.kilograms / this.fuelExhaustRate.kilogramsPerSecond;
+      this._fuelRemaining.kilograms / this.fuelBurnRate.kilogramsPerSecond;
 
     return Time.createSeconds(time);
   }
@@ -66,19 +65,19 @@ export class MissilePropellant {
     return (this._fuelRemaining.grams / this._fuelCapacity.grams) * 100;
   }
 
-  exhaustBallistically(timeframe: Time) {
+  burnBallistically(timeframe: Time) {
     if (this._fuelRemaining.kilograms === 0) return null;
 
     // from 0 to 1
     const maxBurnPercentage = Math.min(
-      this.remainingExhaustTime.seconds / timeframe.seconds,
+      this.remainingBurnTime.seconds / timeframe.seconds,
       1
     );
 
     const thrustForce = new Force(this.maxThrustForce.newtons * timeframe.seconds);
 
     const fuelFullBurnMass =
-      this.fuelExhaustRate.getAsMassPerTimeframe(timeframe);
+      this.fuelBurnRate.getAsMassPerTimeframe(timeframe);
 
     this._fuelRemaining = Mass.createGrams(
       maxBurnPercentage === 1

@@ -1,4 +1,5 @@
 import { useSimulationDistance } from "@/external/hooks/use-window-size";
+import { ConsoleStep, StepVariety } from "@shapilev/console-step";
 import { Application, Assets, Sprite } from "pixi.js";
 import { useEffect, useMemo } from "react";
 import { qassam3 } from "./objects/missile/missile.dataset";
@@ -7,7 +8,7 @@ import { Distance } from "./physics/distance/distance";
 import { Time } from "./physics/time/time";
 
 const missile = qassam3.clone();
-missile.setAngle(Angle.createDegreeAngle(30));
+missile.angle = Angle.createDegreeAngle(30);
 
 export const useGame = (app: Application | undefined) => {
   const { isDataReady, toSimulation } = useSimulationDistance();
@@ -39,10 +40,16 @@ export const useGame = (app: Application | undefined) => {
       const INTERVAL_TIME = Time.createSeconds(1);
       
       setInterval(() => {
-        const { coords, direction } = missile.burn(INTERVAL_TIME);
+        const { coords, direction } = missile.move(INTERVAL_TIME);
         
-        console.log({ x: coords.x.kilometers, y: coords.y.kilometers, speed: missile.velocityMetersPerSecond + "m/s" });
-        
+        new ConsoleStep(`(${coords.x.kilometers.toFixed(4)}km, ${coords.y.kilometers.toFixed(4)}km)`).logAfter(s => {
+          s.createStep("Velocity: " + missile.velocityVector.metersPerSecond.toFixed(4) + "[m/s]")
+          
+          if(missile.isNoFuelRemaining) {
+            s.createStep("No fuel", StepVariety.Warning)
+          }
+        })
+              
         missileCanvasEl.x = toSimulation(coords.x);
         missileCanvasEl.y = toSimulation(coords.y);
         missileCanvasEl.rotation = direction.radians;

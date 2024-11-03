@@ -6,12 +6,12 @@ import { ForceVector } from "./vector/force-vector";
 import { VelocityVector } from "./vector/velocity-vector";
 
 export class MotionService {
-  static getForceFromVelocity(velocity: VelocityVector, mass: Mass) {
-    const updatedSpeed = new Force(velocity.magnitude.metersPerSecond * mass.kilograms)
-    return new ForceVector(updatedSpeed, velocity.direction)
+  static getForceFromAcceleration(acceleration: VelocityVector, mass: Mass): ForceVector {
+    const updatedSpeed = new Force(acceleration.magnitude.metersPerSecond * mass.kilograms)
+    return new ForceVector(updatedSpeed, acceleration.direction)
   }
 
-  static getVelocityFromForce(force: ForceVector, mass: Mass) {
+  static getAccelerationFromForce(force: ForceVector, mass: Mass): VelocityVector {
     const updatedSpeed = Speed.createMetersPerSecond(force.magnitude.newtons / mass.kilograms)
     return new VelocityVector(updatedSpeed, force.direction)
   }
@@ -36,7 +36,7 @@ export class MotionService {
     return { totalAxisX, totalAxisY, totalAngle, totalDistance };
   }
 
-  static getVelocitySum(velocityVectorArray: VelocityVector[]) {
+  static getVectorVelocitySum(velocityVectorArray: VelocityVector[]) {
     const sum = this.getVectorSum(
       velocityVectorArray.map((v) => ({
         axisX: v.axisX.metersPerSecond,
@@ -50,7 +50,7 @@ export class MotionService {
     );
   }
 
-  static getForceSum(velocityForceArray: ForceVector[]) {
+  static getVectorForceSum(velocityForceArray: ForceVector[]) {
     const sum = this.getVectorSum(
       velocityForceArray.map((v) => ({
         axisX: v.axisX.newtons,
