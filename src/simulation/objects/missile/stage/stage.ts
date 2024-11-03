@@ -19,6 +19,10 @@ export class MissileStage {
     this._propulsion = props.propulsion;
   }
 
+  get dryMassInKilograms() {
+    return this._dryMass.kilograms;
+  }
+
   get isNoFuelRemaining() {
     return this.fuelRemainingInKilograms === 0;
   }

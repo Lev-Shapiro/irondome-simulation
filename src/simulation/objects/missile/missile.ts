@@ -69,7 +69,7 @@ export class Missile extends WorldObject {
   get mass() {
     const totalDeactivatedMassInKilograms = this._stages
       .slice(0, this.currentStage)
-      .reduce((a, b) => a + b.fuelRemainingInKilograms, 0);
+      .reduce((a, b) => a + b.dryMassInKilograms, 0);
 
     const updatedDryMass =
       this.dryMass.kilograms - totalDeactivatedMassInKilograms;

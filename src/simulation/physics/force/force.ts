@@ -1,6 +1,6 @@
 
 export class Force {
-  readonly newtons: number; // Measured in Newtons
+  readonly newtons: number;
 
   constructor(force: number) {
     this.newtons = force;

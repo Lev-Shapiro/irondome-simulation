@@ -22,20 +22,6 @@ const clearCoords: Coords = new Coords(
 /*                               Hamas Missiles                               */
 /* -------------------------------------------------------------------------- */
 
-// export const qassam3 = new Missile({
-//   id: "qassam-3",
-//   coords: clearCoords,
-//   dryMass: Mass.createKilograms(90), // Approximate total mass
-//   direction: Angle.createDegreeAngle(0),
-//   size: Size.init(Distance.createMeters(2.2), Distance.createMeters(0.17)),
-//   propellant: new MissileStage({
-//     maxThrustForce: new Force(4000), // Estimated
-//     specificImpulse: Time.createSeconds(150), // Estimated
-//     fuelCapacity: Mass.createKilograms(50), // Estimated
-//     fuelLoaded: Mass.createKilograms(50),
-//   }),
-// });
-
 const UNDEFINED_PROPULSION_DRY_MASS = Mass.createKilograms(10);
 
 export const qassam3 = Missile.createWithSingleStage({
@@ -99,19 +85,8 @@ export const MISSILE_EXAMPLE = new Missile({
   ],
 });
 
-// export const missileDatasetIsrael: Missile[] = [
-//   tamirInterceptor,
-//   arrow3,
-//   davidSling,
-//   jerichoIII,
-// ];
-
 export const missileDatasetHamas: Missile[] = [qassam3, gradRocket];
 
 export const missiles: Missile[] = [
-  // Israel's Missiles
-  // ...missileDatasetIsrael,
-
-  // Hamas's Rockets
   ...missileDatasetHamas,
 ];

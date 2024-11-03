@@ -51,7 +51,6 @@ export class PropulsionSystem {
   }
 
   get remainingBurnTime(): Time {
-    // .kilograms, because thrust force is in Newtons, which is related to kg, not g.
     const time =
       this._fuelRemaining.kilograms / this.fuelBurnRate.kilogramsPerSecond;
 
